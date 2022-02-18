@@ -52,7 +52,7 @@ import ca.mcgill.cs.jetuml.gui.tips.TipDialog;
 import ca.mcgill.cs.jetuml.persistence.DeserializationException;
 import ca.mcgill.cs.jetuml.persistence.PersistenceService;
 import ca.mcgill.cs.jetuml.persistence.VersionedDiagram;
-import ca.mcgill.cs.jetuml.views.ImageCreator;
+import ca.mcgill.cs.jetuml.viewers.ImageCreator;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -104,6 +104,7 @@ public class EditorFrame extends BorderPane
 		setTop(menuBar);
 		
 		TabPane tabPane = new TabPane();
+		tabPane.setTabDragPolicy(TabPane.TabDragPolicy.REORDER);
 		tabPane.getSelectionModel().selectedItemProperty().addListener((pValue, pOld, pNew) -> setMenuVisibility());
 		setCenter( tabPane );
 
@@ -535,7 +536,7 @@ public class EditorFrame extends BorderPane
 		}
 	}
 
-	private File getLastDir(String pKey)
+	private static File getLastDir(String pKey)
 	{
 		String dir = Preferences.userNodeForPackage(JetUML.class).get(pKey, ".");
 		File result = new File(dir);
@@ -546,7 +547,7 @@ public class EditorFrame extends BorderPane
 		return result;
 	}
 	
-	private void setLastDir(String pKey, File pLastExportDir)
+	private static void setLastDir(String pKey, File pLastExportDir)
 	{
 		Preferences.userNodeForPackage(JetUML.class).put(pKey, pLastExportDir.getAbsolutePath().toString());
 	}

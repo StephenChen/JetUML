@@ -26,10 +26,10 @@ import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.Line;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
 import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.LineTo;
@@ -138,6 +138,6 @@ public abstract class AbstractEdgeViewer implements EdgeViewer
 			double angleInDegrees = Math.toDegrees(Math.atan(distanceInY/distanceInX));
 			lineLength = Math.max(MAX_LENGTH_FOR_NORMAL_FONT, (int)((distanceInX / 4) * (1 - angleInDegrees / DEGREES_180)));
 		}
-		return SIZE_TESTER.wrapString(pString, lineLength);
+		return StringViewer.wrapString(pString, lineLength);
 	}
 }

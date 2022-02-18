@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses.
  *******************************************************************************/
 
-package ca.mcgill.cs.jetuml.views;
+package ca.mcgill.cs.jetuml.viewers;
 
 import java.util.Optional;
 
@@ -71,9 +71,9 @@ public class SequenceDiagramViewer extends DiagramViewer
 		{
 			if( newElementBounds == null )
 			{
-				newElementBounds = ViewerUtilities.getBounds(element);
+				newElementBounds = DiagramViewer.getBounds(element);
 			}
-			newElementBounds = newElementBounds.add(ViewerUtilities.getBounds(element));
+			newElementBounds = newElementBounds.add(DiagramViewer.getBounds(element));
 		}
 		if( newElementBounds == null )
 		{

@@ -40,10 +40,10 @@ import ca.mcgill.cs.jetuml.diagram.edges.ConstructorEdge;
 import ca.mcgill.cs.jetuml.diagram.nodes.CallNode;
 import ca.mcgill.cs.jetuml.diagram.nodes.ImplicitParameterNode;
 import ca.mcgill.cs.jetuml.geom.Point;
+import ca.mcgill.cs.jetuml.viewers.DiagramViewer;
 import ca.mcgill.cs.jetuml.viewers.edges.EdgeViewerRegistry;
 import ca.mcgill.cs.jetuml.viewers.nodes.ImplicitParameterNodeViewer;
 import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
-import ca.mcgill.cs.jetuml.views.DiagramViewer;
 
 /**
  * A builder for sequence diagrams.
@@ -99,8 +99,7 @@ public class SequenceDiagramBuilder extends DiagramBuilder
 		{
 			Node startNode = start.get();
 			Node endNode = end.get();
-			return 	(startNode instanceof ImplicitParameterNode || startNode instanceof CallNode) && 
-					new ControlFlow(aDiagram).canCreateConstructedObject(endNode, pEnd);
+			return 	SequenceDiagramEdgeConstraints.canCreateConstructor(startNode, endNode, pEnd);
 		}
 		return false;
 	}
@@ -125,6 +124,11 @@ public class SequenceDiagramBuilder extends DiagramBuilder
 			result.addAll(flow.getEdgeDownStreams((Edge)pElement));
 		}	
 		result.addAll(flow.getCorrespondingReturnEdges(result));
+		//Implicit parameter nodes downstream of constructor calls should not be removed
+		if (pElement instanceof ConstructorEdge) 
+		{
+			result.removeIf(element -> element instanceof ImplicitParameterNode);
+		}
 		return result;
 	}
 	

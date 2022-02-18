@@ -19,7 +19,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses.
  *******************************************************************************/
 
-package ca.mcgill.cs.jetuml.views;
+package ca.mcgill.cs.jetuml.viewers;
 
 import java.util.Optional;
 
@@ -71,7 +71,7 @@ public class DiagramViewer
 	 * @return An edge containing pPoint or Optional.empty() if no edge is under pPoint
 	 * @pre pDiagram != null && pPoint != null
 	 */
-	public final Optional<Edge> edgeAt(Diagram pDiagram, Point pPoint)
+	public static Optional<Edge> edgeAt(Diagram pDiagram, Point pPoint)
 	{
 		assert pDiagram != null && pPoint != null;
 		return pDiagram.edges().stream()
@@ -143,7 +143,7 @@ public class DiagramViewer
 	 * @return The bounding rectangle
 	 * @pre pDiagram != null
 	 */
-	public final Rectangle getBounds(Diagram pDiagram)
+	public static Rectangle getBounds(Diagram pDiagram)
 	{
 		assert pDiagram != null;
 		Rectangle bounds = null;
@@ -173,6 +173,27 @@ public class DiagramViewer
 	}
 	
 	/**
+	 * Obtains the bounds for an element.
+	 * 
+	 * @param pElement The element whose bounds we want
+	 * @return The bounds for this element.
+	 * @pre pElement != null
+	 */
+	public static Rectangle getBounds(DiagramElement pElement)
+	{
+		assert pElement != null;
+		if( pElement instanceof Node )
+		{
+			return NodeViewerRegistry.getBounds((Node)pElement);
+		}
+		else
+		{
+			assert pElement instanceof Edge;
+			return EdgeViewerRegistry.getBounds((Edge)pElement);
+		}
+	}
+	
+	/**
 	 * Used during pasting to determine whether the current selection bounds completely overlaps the new elements.
 	 * @param pCurrentSelectionBounds The current selection bounds
 	 * @param pNewElements Elements to be pasted
@@ -185,9 +206,9 @@ public class DiagramViewer
 		{
 			if (newElementBounds == null) 
 			{
-				newElementBounds = ViewerUtilities.getBounds(element);
+				newElementBounds = DiagramViewer.getBounds(element);
 			}
-			newElementBounds = newElementBounds.add(ViewerUtilities.getBounds(element));
+			newElementBounds = newElementBounds.add(DiagramViewer.getBounds(element));
 		}
 		if (pCurrentSelectionBounds.equals(newElementBounds)) 
 		{

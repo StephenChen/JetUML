@@ -28,12 +28,12 @@ import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.Line;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
+import ca.mcgill.cs.jetuml.viewers.ArrowHead;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
 import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
-import ca.mcgill.cs.jetuml.views.ArrowHead;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -144,7 +144,7 @@ public final class StateTransitionEdgeViewer extends AbstractEdgeViewer
      * @param pString The input string. Can be null.
      * @return The dimensions of the string.
 	 */
-	public Dimension getLabelBounds(String pString)
+	private static Dimension getLabelBounds(String pString)
 	{
 		if(pString == null || pString.length() == 0) 
 		{
@@ -263,12 +263,12 @@ public final class StateTransitionEdgeViewer extends AbstractEdgeViewer
 		}
 	}
 	
-	private boolean isSelfEdge(Edge pEdge)
+	private static boolean isSelfEdge(Edge pEdge)
 	{
 		return pEdge.getStart() == pEdge.getEnd();
 	}
 	
-	private Shape getSelfEdgeShape(Edge pEdge)
+	private static Shape getSelfEdgeShape(Edge pEdge)
 	{
 		Line line = getSelfEdgeConnectionPoints(pEdge);
 		Arc arc = new Arc();
@@ -310,7 +310,7 @@ public final class StateTransitionEdgeViewer extends AbstractEdgeViewer
 	 *     edges between the same start and end nodes. 
 	 * @pre getGraph() != null
 	 */
-	private int getPosition(Edge pEdge)
+	private static int getPosition(Edge pEdge)
 	{
 		assert pEdge.getDiagram() != null;
 		int lReturn = 0;
@@ -333,7 +333,7 @@ public final class StateTransitionEdgeViewer extends AbstractEdgeViewer
 	 * The connection points for the self-edge are an offset from the top-right
 	 * corner.
 	 */
-	private Line getSelfEdgeConnectionPoints(Edge pEdge)
+	private static Line getSelfEdgeConnectionPoints(Edge pEdge)
 	{
 		if( getPosition(pEdge) == 1 )
 		{
@@ -405,7 +405,7 @@ public final class StateTransitionEdgeViewer extends AbstractEdgeViewer
 	 * The connection points are a slight offset from the center.
 	 * @return
 	 */
-	private Line getNormalEdgeConnectionsPoints(Edge pEdge)
+	private static Line getNormalEdgeConnectionsPoints(Edge pEdge)
 	{
 		Rectangle start = NodeViewerRegistry.getBounds(pEdge.getStart());
 		Rectangle end = NodeViewerRegistry.getBounds(pEdge.getEnd());

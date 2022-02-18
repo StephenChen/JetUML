@@ -24,11 +24,11 @@ import ca.mcgill.cs.jetuml.diagram.Node;
 import ca.mcgill.cs.jetuml.diagram.nodes.ActorNode;
 import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.StringViewer.TextDecoration;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.TextDecoration;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
@@ -73,7 +73,7 @@ public final class ActorNodeViewer extends AbstractNodeViewer
 		ToolGraphics.strokeSharpPath(pGraphics, createStickManPath(pNode), LineStyle.SOLID);
 	}
 	
-	private Path createStickManPath(Node pNode)
+	private static Path createStickManPath(Node pNode)
 	{
 		Path path = new Path();
 		

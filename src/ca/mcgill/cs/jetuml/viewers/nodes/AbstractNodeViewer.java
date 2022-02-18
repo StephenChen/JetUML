@@ -20,14 +20,12 @@
  *******************************************************************************/
 package ca.mcgill.cs.jetuml.viewers.nodes;
 
-import java.util.Optional;
-
 import ca.mcgill.cs.jetuml.diagram.Node;
 import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.GeomUtils;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -45,34 +43,12 @@ public abstract class AbstractNodeViewer implements NodeViewer
 	/* 
 	 * The default behavior for containment is to return true if the point is
 	 * within the bounding box of the node view.
-	 * @see ca.mcgill.cs.jetuml.views.DiagramElementView#contains(ca.mcgill.cs.jetuml.geom.Point)
+	 * @see ca.mcgill.cs.jetuml.viewers.DiagramElementView#contains(ca.mcgill.cs.jetuml.geom.Point)
 	 */
 	@Override
 	public boolean contains(Node pNode, Point pPoint)
 	{
 		return getBounds(pNode).contains(pPoint);
-	}
-	
-	protected static Optional<Point> computeConnectionPointForCanonicalDirection(Rectangle pBounds, Direction pDirection)
-	{
-		Optional<Point> result = Optional.empty();
-		if( pDirection == Direction.NORTH )
-		{
-			result = Optional.of(new Point(pBounds.getCenter().getX(), pBounds.getY()));
-		}
-		else if( pDirection == Direction.SOUTH )
-		{
-			result =  Optional.of(new Point(pBounds.getCenter().getX(), pBounds.getMaxY()));
-		}
-		else if( pDirection == Direction.EAST)
-		{
-			result = Optional.of(new Point(pBounds.getMaxX(), pBounds.getCenter().getY()));
-		}
-		else if( pDirection == Direction.WEST )
-		{
-			result = Optional.of(new Point(pBounds.getX(), pBounds.getCenter().getY()));
-		}
-		return result;
 	}
 	
 	/* 

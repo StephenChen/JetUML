@@ -21,7 +21,7 @@
 package ca.mcgill.cs.jetuml.views;
 
 import static ca.mcgill.cs.jetuml.testutils.GeometryUtils.osDependent;
-import static ca.mcgill.cs.jetuml.views.FontMetrics.DEFAULT_FONT_SIZE;
+import static ca.mcgill.cs.jetuml.viewers.FontMetrics.DEFAULT_FONT_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -34,8 +34,9 @@ import org.junit.jupiter.api.Test;
 import ca.mcgill.cs.jetuml.application.UserPreferences;
 import ca.mcgill.cs.jetuml.application.UserPreferences.IntegerPreference;
 import ca.mcgill.cs.jetuml.geom.Dimension;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.StringViewer.TextDecoration;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.TextDecoration;
 
 public class TestStringViewer 
 {
@@ -114,11 +115,11 @@ public class TestStringViewer
 	@Test
 	public void testWrapString()
 	{
-		assertEquals("Display String", topCenter.wrapString("Display String", 15));
+		assertEquals("Display String", StringViewer.wrapString("Display String", 15));
 		assertEquals("A really long\nstring that\nshould probably\nbe wrapped", 
-				topCenter.wrapString("A really long string that should probably be wrapped", 15));
-		assertEquals("Display\nString", topCenter.wrapString("Display String", 1));
+				StringViewer.wrapString("A really long string that should probably be wrapped", 15));
+		assertEquals("Display\nString", StringViewer.wrapString("Display String", 1));
 		assertEquals("A\nreally\nlong\nstring\nthat\nshould\nprobably\nbe\nwrapped", 
-				topCenter.wrapString("A really long string that should probably be wrapped", 1));
+				StringViewer.wrapString("A really long string that should probably be wrapped", 1));
 	}
 }

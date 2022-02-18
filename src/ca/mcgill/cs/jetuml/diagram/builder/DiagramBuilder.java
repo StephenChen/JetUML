@@ -47,9 +47,9 @@ import ca.mcgill.cs.jetuml.diagram.nodes.PointNode;
 import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
+import ca.mcgill.cs.jetuml.viewers.DiagramViewer;
 import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
 import ca.mcgill.cs.jetuml.viewers.nodes.PackageNodeViewer;
-import ca.mcgill.cs.jetuml.views.DiagramViewer;
 
 /**
  * Wrapper around a Diagram that provides the logic for converting
@@ -399,7 +399,7 @@ public abstract class DiagramBuilder
  	 * @return The requested operation.
  	 * @pre pNode != null.
 	 */
-	public final DiagramOperation createMoveNodeOperation(Node pNode, int pX, int pY)
+	public static DiagramOperation createMoveNodeOperation(Node pNode, int pX, int pY)
 	{
 		return new SimpleOperation(
 				()-> pNode.translate(pX, pY),
@@ -472,7 +472,7 @@ public abstract class DiagramBuilder
 		};
 	}
 	
-	private Runnable createDetachOperation(Node pNode)
+	private static Runnable createDetachOperation(Node pNode)
 	{
 		Node parent = pNode.getParent();
 		if(parent.getClass()==PackageNode.class && parent.getChildren().size()==1)

@@ -25,10 +25,10 @@ import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.Line;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
+import ca.mcgill.cs.jetuml.viewers.ArrowHead;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
 import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
-import ca.mcgill.cs.jetuml.views.ArrowHead;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.LineTo;
@@ -57,7 +57,7 @@ public final class ObjectReferenceEdgeViewer extends AbstractEdgeViewer
 		}			
 	}
 	
-	private Path getSShape(Line pConnectionPoints)
+	private static Path getSShape(Line pConnectionPoints)
 	{
 		final int x1 = pConnectionPoints.getX1() + ENDSIZE;
 		final int y1 = pConnectionPoints.getY1();
@@ -77,7 +77,7 @@ public final class ObjectReferenceEdgeViewer extends AbstractEdgeViewer
 		return path;
 	}
 	
-	private Path getCShape(Line pConnectionPoints)
+	private static Path getCShape(Line pConnectionPoints)
 	{
 		final int x1 = Math.max(pConnectionPoints.getX1(), pConnectionPoints.getX2()) + ENDSIZE;
 		final int y1 = pConnectionPoints.getY1();

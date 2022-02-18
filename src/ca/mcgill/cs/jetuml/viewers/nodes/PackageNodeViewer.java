@@ -39,7 +39,7 @@ public final class PackageNodeViewer extends AbstractPackageNodeViewer
 	/*
 	 * Computes the bounding box that encompasses all children.
 	 */
-	private Optional<Rectangle> getChildrenBounds(Node pNode)
+	private static Optional<Rectangle> getChildrenBounds(Node pNode)
 	{
 		if( ((PackageNode)pNode).getChildren().isEmpty() )
 		{
@@ -75,6 +75,7 @@ public final class PackageNodeViewer extends AbstractPackageNodeViewer
 				pChildrenBounds.get().getY() - PADDING - getTopDimension(pNode).height());
 	}
 	
+	@Override
 	protected Rectangle getTopBounds(AbstractPackageNode pNode)
 	{
 		Optional<Rectangle> childrenBounds = getChildrenBounds(pNode);
@@ -83,6 +84,7 @@ public final class PackageNodeViewer extends AbstractPackageNodeViewer
 		return new Rectangle(position.getX(), position.getY(), topDimension.width(), topDimension.height());
 	}
 	
+	@Override
 	protected Rectangle getBottomBounds(AbstractPackageNode pNode)
 	{
 		int width = DEFAULT_WIDTH;

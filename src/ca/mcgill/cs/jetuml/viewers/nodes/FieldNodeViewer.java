@@ -27,8 +27,8 @@ import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -62,12 +62,12 @@ public final class FieldNodeViewer extends AbstractNodeViewer
 				pGraphics, new Rectangle(split + midOffset, bounds.getY(), rightWidth(pNode), bounds.getHeight()));
 	}
 	
-	private int getSplitPosition(Node pNode)
+	private static int getSplitPosition(Node pNode)
 	{
 		ObjectNode parent = (ObjectNode)pNode.getParent();
 		if( parent != null )
 		{
-			return OBJECT_NODE_VIEWER.getSplitPosition(parent);
+			return ObjectNodeViewer.getSplitPosition(parent);
 		}
 		else
 		{
@@ -82,7 +82,7 @@ public final class FieldNodeViewer extends AbstractNodeViewer
 		final int height = getHeight(pNode);
 		if( pNode.hasParent() )
 		{
-			int yPosition = OBJECT_NODE_VIEWER.getYPosition(pNode.getParent(), (FieldNode) pNode);
+			int yPosition = ObjectNodeViewer.getYPosition(pNode.getParent(), (FieldNode) pNode);
 			Rectangle parentBounds = OBJECT_NODE_VIEWER.getBounds(pNode.getParent());
 			return new Rectangle(parentBounds.getX() + XGAP, yPosition, parentBounds.getWidth() - 2*XGAP, height);
 		}
@@ -93,8 +93,9 @@ public final class FieldNodeViewer extends AbstractNodeViewer
 	 * @param pNode The node
 	 * @return The width of the left (name) part of the node.
 	 */
-	public int leftWidth(Node pNode)
+	public static int leftWidth(Node pNode)
 	{
+		assert FieldNode.class.isInstance(pNode);
 		final int midOffset = EQUALS_VIEWER.getDimension(EQUALS).width() / 2;
 		return NAME_VIEWER.getDimension(((FieldNode)pNode).getName()).width() + midOffset;
 	}
@@ -103,8 +104,9 @@ public final class FieldNodeViewer extends AbstractNodeViewer
 	 * @param pNode The node.
 	 * @return The width of the right (value) part of the node.
 	 */
-	public int rightWidth(Node pNode)
+	public static int rightWidth(Node pNode)
 	{
+		assert FieldNode.class.isInstance(pNode);
 		final int midOffset = EQUALS_VIEWER.getDimension(EQUALS).width() / 2;
 		int rightWidth = VALUE_VIEWER.getDimension(((FieldNode)pNode).getValue()).width();
 		if(rightWidth == 0)
@@ -118,8 +120,9 @@ public final class FieldNodeViewer extends AbstractNodeViewer
 	 * @param pNode The node
 	 * @return The height of this node.
 	 */
-	public int getHeight(Node pNode)
+	public static int getHeight(Node pNode)
 	{
+		assert FieldNode.class.isInstance(pNode);
 		return Math.max(DEFAULT_HEIGHT, Math.max(NAME_VIEWER.getDimension(((FieldNode)pNode).getName()).height(), 
 				Math.max(VALUE_VIEWER.getDimension(((FieldNode)pNode).getValue()).height(), 
 						EQUALS_VIEWER.getDimension(EQUALS).height())));

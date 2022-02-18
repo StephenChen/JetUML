@@ -25,12 +25,12 @@ import ca.mcgill.cs.jetuml.diagram.nodes.FieldNode;
 import ca.mcgill.cs.jetuml.diagram.nodes.ObjectNode;
 import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.Grid;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.StringViewer.TextDecoration;
-import ca.mcgill.cs.jetuml.views.ViewUtils;
+import ca.mcgill.cs.jetuml.viewers.Grid;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ViewerUtils;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.TextDecoration;
 import javafx.scene.canvas.GraphicsContext;
 
 /**
@@ -45,7 +45,6 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 	private static final int YGAP = 5;
 	private static final StringViewer NAME_VIEWER = StringViewer.get(Alignment.CENTER_CENTER, 
 			TextDecoration.BOLD, TextDecoration.UNDERLINED, TextDecoration.PADDED);
-	private static final FieldNodeViewer FIELD_NODE_VIEWER = new FieldNodeViewer();
 	
 	@Override
 	public void draw(Node pNode, GraphicsContext pGraphics)
@@ -53,16 +52,16 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 		final Rectangle bounds = getBounds(pNode);
 		final Rectangle topRectangle = getTopRectangle(pNode);
 		int dividerPosition = topRectangle.getMaxY();
-		ViewUtils.drawRectangle(pGraphics, bounds);
+		ViewerUtils.drawRectangle(pGraphics, bounds);
 		if( ((ObjectNode)pNode).getChildren().size() > 0 ) 
 		{
-			ViewUtils.drawLine(pGraphics, bounds.getX(), dividerPosition, bounds.getMaxX(), dividerPosition, LineStyle.SOLID);
+			ViewerUtils.drawLine(pGraphics, bounds.getX(), dividerPosition, bounds.getMaxX(), dividerPosition, LineStyle.SOLID);
 		}
 		NAME_VIEWER.draw(((ObjectNode)pNode).getName(), pGraphics, 
 				new Rectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), topRectangle.getHeight()));
 	}
 	
-	private Rectangle getTopRectangle(Node pNode)
+	private static Rectangle getTopRectangle(Node pNode)
 	{
 		Dimension bounds = NAME_VIEWER.getDimension(((ObjectNode)pNode).getName() + TEXT_HORIZONTAL_MARGIN); 
 		bounds = bounds.include(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -73,12 +72,13 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 	 * @param pNode The node
 	 * @return The position that represents the split between the name and value fields.
 	 */
-	public int getSplitPosition(Node pNode)
+	public static int getSplitPosition(Node pNode)
 	{
+		assert ObjectNode.class.isInstance(pNode);
 		int leftWidth = 0;
 		for(Node field : ((ObjectNode)pNode).getChildren())
 		{
-			leftWidth = Math.max(leftWidth, FIELD_NODE_VIEWER.leftWidth(field));
+			leftWidth = Math.max(leftWidth, FieldNodeViewer.leftWidth(field));
 		}
 		return pNode.position().getX() + leftWidth + XGAP;
 	}
@@ -96,9 +96,9 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 		}
 		for(Node field : ((ObjectNode)pNode).getChildren())
 		{
-			height += FIELD_NODE_VIEWER.getHeight(field) + YGAP;   
-			leftWidth = Math.max(leftWidth, FIELD_NODE_VIEWER.leftWidth(field));
-			rightWidth = Math.max(rightWidth, FIELD_NODE_VIEWER.rightWidth(field));
+			height += FieldNodeViewer.getHeight(field) + YGAP;   
+			leftWidth = Math.max(leftWidth, FieldNodeViewer.leftWidth(field));
+			rightWidth = Math.max(rightWidth, FieldNodeViewer.rightWidth(field));
 		}
 		int width = Math.max(bounds.getWidth(), leftWidth + rightWidth + 2 * XGAP);
 		width = Grid.toMultiple(width);
@@ -110,7 +110,7 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 	 * @param pFieldNode The node whose position to compute.
 	 * @return The y position of a child node.
 	 */
-	public int getYPosition(Node pNode, FieldNode pFieldNode)
+	public static int getYPosition(Node pNode, FieldNode pFieldNode)
 	{
 		assert ((ObjectNode)pNode).getChildren().contains(pFieldNode);
 		Rectangle bounds = getTopRectangle(pNode);
@@ -122,7 +122,7 @@ public final class ObjectNodeViewer extends AbstractNodeViewer
 			{
 				return yPosition;
 			}
-			yPosition += FIELD_NODE_VIEWER.getHeight(field);
+			yPosition += FieldNodeViewer.getHeight(field);
 		}
 		return yPosition;
 	}

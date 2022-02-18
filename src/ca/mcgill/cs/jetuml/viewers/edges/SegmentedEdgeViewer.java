@@ -28,11 +28,11 @@ import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Line;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.ArrowHead;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.ArrowHead;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ToolGraphics;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
@@ -292,7 +292,7 @@ public class SegmentedEdgeViewer extends AbstractEdgeViewer
 		return bounds;
 	}
 	
-	private boolean isStepUp(Edge pEdge) 
+	private static boolean isStepUp(Edge pEdge) 
 	{
 		Point point1 = EdgeViewerRegistry.getConnectionPoints(pEdge).getPoint1();
 		Point point2 = EdgeViewerRegistry.getConnectionPoints(pEdge).getPoint2();

@@ -33,11 +33,11 @@ import ca.mcgill.cs.jetuml.diagram.nodes.ImplicitParameterNode;
 import ca.mcgill.cs.jetuml.geom.Direction;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.LineStyle;
-import ca.mcgill.cs.jetuml.views.StringViewer;
-import ca.mcgill.cs.jetuml.views.StringViewer.Alignment;
-import ca.mcgill.cs.jetuml.views.StringViewer.TextDecoration;
-import ca.mcgill.cs.jetuml.views.ViewUtils;
+import ca.mcgill.cs.jetuml.viewers.LineStyle;
+import ca.mcgill.cs.jetuml.viewers.StringViewer;
+import ca.mcgill.cs.jetuml.viewers.ViewerUtils;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.Alignment;
+import ca.mcgill.cs.jetuml.viewers.StringViewer.TextDecoration;
 import javafx.scene.canvas.GraphicsContext;
 
 /**
@@ -58,10 +58,10 @@ public final class ImplicitParameterNodeViewer extends AbstractNodeViewer
 	public void draw(Node pNode, GraphicsContext pGraphics)
 	{
 		Rectangle top = getTopRectangle(pNode);
-		ViewUtils.drawRectangle(pGraphics, top);
+		ViewerUtils.drawRectangle(pGraphics, top);
 		NAME_VIEWER.draw(((ImplicitParameterNode)pNode).getName(), pGraphics, top);
 		int xmid = top.getCenter().getX();
-		ViewUtils.drawLine(pGraphics, xmid,  top.getMaxY(), xmid, getBounds(pNode).getMaxY(), LineStyle.DOTTED);
+		ViewerUtils.drawLine(pGraphics, xmid,  top.getMaxY(), xmid, getBounds(pNode).getMaxY(), LineStyle.DOTTED);
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public final class ImplicitParameterNodeViewer extends AbstractNodeViewer
 		}
 	}
 	
-	private Point getMaxXYofChildren(Node pNode)
+	private static Point getMaxXYofChildren(Node pNode)
 	{
 		int maxY = 0;
 		int maxX = 0;
@@ -153,7 +153,7 @@ public final class ImplicitParameterNodeViewer extends AbstractNodeViewer
 	/*
 	 * Returns true if the ImplicitParameterNode is in the constructor call
 	 */
-	private boolean isInConstructorCall(Node pNode) 
+	private static boolean isInConstructorCall(Node pNode) 
 	{
 		Optional<Diagram> diagram = pNode.getDiagram();
 		if(diagram.isPresent())
@@ -169,7 +169,7 @@ public final class ImplicitParameterNodeViewer extends AbstractNodeViewer
 	 * Returns the Optional of the first child node of the ImplicitParameterNode if exists;
 	 * otherwise, returns Optional.empty().
 	 */
-	private Optional<Node> getFirstChild(Node pNode)
+	private static Optional<Node> getFirstChild(Node pNode)
 	{
 		assert pNode!=null;
 		List<Node> children = pNode.getChildren();

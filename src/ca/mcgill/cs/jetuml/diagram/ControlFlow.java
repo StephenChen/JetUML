@@ -21,26 +21,27 @@
 
 package ca.mcgill.cs.jetuml.diagram;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import ca.mcgill.cs.jetuml.annotations.Immutable;
 import ca.mcgill.cs.jetuml.diagram.edges.CallEdge;
 import ca.mcgill.cs.jetuml.diagram.edges.ConstructorEdge;
 import ca.mcgill.cs.jetuml.diagram.edges.ReturnEdge;
 import ca.mcgill.cs.jetuml.diagram.nodes.CallNode;
 import ca.mcgill.cs.jetuml.diagram.nodes.ImplicitParameterNode;
-import ca.mcgill.cs.jetuml.geom.Point;
-import ca.mcgill.cs.jetuml.viewers.nodes.ImplicitParameterNodeViewer;
 
 /**
- * An immutable wrapper around a SequenceDiagram that can answer
+ * An immutable wrapper around a sequence Diagram that can answer
  * various queries about the control-flow represented by 
  * the wrapped sequence diagram.
  */
+@Immutable
 public final class ControlFlow
 {
 	private final Diagram aDiagram;
@@ -49,7 +50,7 @@ public final class ControlFlow
 	 * Creates a new ControlFlow to query pDiagram.
 	 * 
 	 * @param pDiagram The diagram to wrap.
-	 * @pre pDiagram != null.
+	 * @pre pDiagram != null && pDiagram.getType() == DiagramType.SEQUENCE
 	 */
 	public ControlFlow(Diagram pDiagram)
 	{
@@ -70,15 +71,11 @@ public final class ControlFlow
 	public List<Node> getCallees(Node pNode)
 	{
 		assert pNode != null && aDiagram.contains(pNode);
-		List<Node> callees = new ArrayList<>();
-		for( Edge edge : aDiagram.edges() )
-		{
-			if ( edge.getStart() == pNode && edge instanceof CallEdge )
-			{
-				callees.add(edge.getEnd());
-			}
-		}
-		return callees;
+		return aDiagram.edges().stream()
+				.filter(CallEdge.class::isInstance)
+				.filter(edge -> edge.getStart() == pNode)
+				.map(Edge::getEnd)
+				.collect(toList());
 	}
 	
 	/**
@@ -89,15 +86,11 @@ public final class ControlFlow
 	public List<CallEdge> getCalls(Node pCaller)
 	{
 		assert pCaller != null;
-		ArrayList<CallEdge> result = new ArrayList<>();
-		for( Edge edge : aDiagram.edges() )
-		{
-			if( edge instanceof CallEdge && edge.getStart() == pCaller )
-			{
-				result.add((CallEdge)edge);
-			}
-		}
-		return result;
+		return aDiagram.edges().stream()
+				.filter(CallEdge.class::isInstance)
+				.map(CallEdge.class::cast)
+				.filter(edge -> edge.getStart() == pCaller)
+				.collect(toList());
 	}
 	
 	/**
@@ -111,14 +104,12 @@ public final class ControlFlow
 	public Optional<CallNode> getCaller(Node pNode)
 	{
 		assert pNode != null && aDiagram.contains(pNode);
-		for( Edge edge : aDiagram.edges() )
-		{
-			if( edge.getEnd() == pNode  && edge instanceof CallEdge )
-			{
-				return Optional.of((CallNode) edge.getStart());
-			}
-		}
-		return Optional.empty();
+		return aDiagram.edges().stream()
+			.filter(CallEdge.class::isInstance)
+			.filter(edge -> edge.getEnd() == pNode)
+			.map(Edge::getStart)
+			.map(CallNode.class::cast)
+			.findFirst();
 	}
 	
 	/**
@@ -159,6 +150,8 @@ public final class ControlFlow
 	}
 	
 	/**
+	 * Checks whether a call node represents a nested (recursive) call.
+	 * 
 	 * @param pNode The node to test.
 	 * @return True if pNode has a caller on the same implicit parameter node, false otherwise.
 	 * @pre pNode != null && contains(pNode) && pNode.getParent() != null
@@ -237,10 +230,10 @@ public final class ControlFlow
 	{
 		assert pNode != null;
 		return pNode.getClass() == ImplicitParameterNode.class && pNode.getChildren().size() > 0 &&
-				isConstructorExecution(getFirstChild(pNode));
+				isConstructorExecution(firstChildOf(pNode));
 	}
 	
-	private Node getFirstChild(Node pNode)
+	private static Node firstChildOf(Node pNode)
 	{
 		assert pNode.getChildren().size() > 0;
 		return pNode.getChildren().get(0);
@@ -330,7 +323,7 @@ public final class ControlFlow
 		}
 		else if( isConstructedObject(pNode) )
 		{
-			Optional<Edge> constructorEdge = getConstructorEdge(getFirstChild(pNode));
+			Optional<Edge> constructorEdge = getConstructorEdge(firstChildOf(pNode));
 			if( constructorEdge.isPresent() )
 			{
 				downstreamElements.addAll(getEdgeDownStreams(constructorEdge.get()));
@@ -372,18 +365,6 @@ public final class ControlFlow
 				calls.contains(pEdge);
 	}
 	
-	private Optional<Edge> getReturnEdge(Edge pEdge)
-	{
-		for( Edge edge : aDiagram.edges() )
-		{
-			if( edge.getClass() == ReturnEdge.class && edge.getStart() == pEdge.getEnd() && edge.getEnd() == pEdge.getStart() )
-			{
-				return Optional.of(edge);
-			}
-		}
-		return Optional.empty();
-	}
-	
 	/**
 	 * @param pNode The Node to obtain the caller and upstream DiagramElements for.
 	 * @return The Collection of DiagramElements in the upstream of pNode.
@@ -418,7 +399,7 @@ public final class ControlFlow
 		}
 		else if( pNode.getClass() == ImplicitParameterNode.class && pNode.getChildren().size() > 0 )
 		{
-			Optional<CallNode> caller = getCaller(getFirstChild(pNode));
+			Optional<CallNode> caller = getCaller(firstChildOf(pNode));
 			if( caller.isPresent() && getCaller(caller.get()).isEmpty() && onlyCallsOneObject(caller.get(), pNode) )
 			{
 				elements.add(caller.get());
@@ -471,18 +452,13 @@ public final class ControlFlow
 		}
 		return returnEdges;
 	}
-
-	/**
-	 * @param pNode The Node to check if it can create a constructed object.
-	 * @param pPoint The point to check if it is within the top rectangular bound of pNode.
-	 * @return True if pNode is an ImplicitParameterNode with no child nodes and pPoint is within the top rectangular bound of pNode.
-	 * @pre pNode != null && pPoint != null
-	 */
-	public boolean canCreateConstructedObject(Node pNode, Point pPoint)
+	
+	private Optional<Edge> getReturnEdge(Edge pEdge)
 	{
-		assert pNode != null && pPoint != null;
-		return pNode instanceof ImplicitParameterNode && 
-				new ImplicitParameterNodeViewer().getTopRectangle(pNode).contains(pPoint) && 
-				pNode.getChildren().size()==0;
+		return aDiagram.edges().stream()
+			.filter(ReturnEdge.class::isInstance)
+			.filter(edge -> edge.getStart() == pEdge.getEnd())
+			.filter(edge -> edge.getEnd() == pEdge.getStart())
+			.findFirst();
 	}
 }

@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import ca.mcgill.cs.jetuml.application.Clipboard;
-import ca.mcgill.cs.jetuml.application.MoveTracker;
 import ca.mcgill.cs.jetuml.application.UserPreferences;
 import ca.mcgill.cs.jetuml.application.UserPreferences.BooleanPreference;
 import ca.mcgill.cs.jetuml.diagram.DiagramElement;
@@ -47,7 +46,9 @@ import ca.mcgill.cs.jetuml.geom.Dimension;
 import ca.mcgill.cs.jetuml.geom.Line;
 import ca.mcgill.cs.jetuml.geom.Point;
 import ca.mcgill.cs.jetuml.geom.Rectangle;
-import ca.mcgill.cs.jetuml.views.Grid;
+import ca.mcgill.cs.jetuml.viewers.DiagramViewer;
+import ca.mcgill.cs.jetuml.viewers.Grid;
+import ca.mcgill.cs.jetuml.viewers.nodes.NodeViewerRegistry;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
@@ -185,7 +186,7 @@ public class DiagramCanvasController
 	 * @param pElements The elements to shift.
 	 * @param pShiftAmount Amount to shift elements by to prevent overlapping.
 	 */
-	private void shiftElements(Iterable<DiagramElement> pElements, int pShiftAmount) 
+	private static void shiftElements(Iterable<DiagramElement> pElements, int pShiftAmount) 
 	{
 		for (DiagramElement element: pElements) 
 		{
@@ -266,7 +267,7 @@ public class DiagramCanvasController
 						     Math.abs(aMouseDownPoint.getY() - aLastMousePoint.getY()));
 	}
 	
-	private Point getMousePoint(MouseEvent pEvent)
+	private static Point getMousePoint(MouseEvent pEvent)
 	{
 		return new Point((int)pEvent.getX(), (int)pEvent.getY());
 	}
@@ -275,7 +276,7 @@ public class DiagramCanvasController
 	{
 		Point mousePoint = getMousePoint(pEvent);
 		Optional<? extends DiagramElement> element = 
-				viewerFor(aDiagramBuilder.getDiagram()).edgeAt(aDiagramBuilder.getDiagram(), mousePoint);
+				DiagramViewer.edgeAt(aDiagramBuilder.getDiagram(), mousePoint);
 		if(!element.isPresent())
 		{
 			element = viewerFor(aDiagramBuilder.getDiagram())
@@ -452,14 +453,36 @@ public class DiagramCanvasController
 	private void alignMoveToGrid()
 	{
 		Iterator<Node> selectedNodes = aSelectionModel.getSelectedNodes().iterator();
+		Rectangle entireBounds = aSelectionModel.getEntireSelectionBounds();
+		
 		if( selectedNodes.hasNext() )
 		{
 			// Pick one node in the selection model, arbitrarily
 			Node firstSelected = selectedNodes.next();
-			Point position = firstSelected.position();
-			Point snappedPosition = Grid.snapped(position);
-			final int dx = snappedPosition.getX() - position.getX();
-			final int dy = snappedPosition.getY() - position.getY();
+			Rectangle bounds = NodeViewerRegistry.getBounds(firstSelected);
+			Rectangle snappedPosition = Grid.snapped(bounds);
+			
+			int dx = snappedPosition.getX() - bounds.getX();
+			int dy = snappedPosition.getY() - bounds.getY();
+			
+			//ensure the bounds of the entire selection are not outside the walls of the canvas
+			if (entireBounds.getMaxX() + dx > aCanvas.getWidth()) 
+			{
+				dx -= GRID_SIZE;
+			}
+			else if (entireBounds.getX() + dx <= 0) 
+			{
+				dx += GRID_SIZE;
+			}
+			if (entireBounds.getMaxY() + dy > aCanvas.getHeight()) 
+			{
+				dy -= GRID_SIZE;
+			}
+			else if (entireBounds.getY() <= 0) 
+			{
+				dy += GRID_SIZE;
+			}
+			
 			for(Node selected : aSelectionModel.getSelectedNodes())
 			{
 				selected.translate(dx, dy);
@@ -548,18 +571,18 @@ public class DiagramCanvasController
 		
 		int dx = pMousePoint.getX() - aLastMousePoint.getX();
 		int dy = pMousePoint.getY() - aLastMousePoint.getY();
-
-		// Ensure the selection does not exceed the canvas bounds
+		
+		// Perform the move without painting it
+		aSelectionModel.getSelectedNodes().forEach(selected -> selected.translate(dx, dy));
+		
+		// If this translation results in exceeding the canvas bounds, roll back.
 		Rectangle bounds = aSelectionModel.getEntireSelectionBounds();
-		dx = Math.max(dx, -bounds.getX());
-		dy = Math.max(dy, -bounds.getY());
-		dx = Math.min(dx, (int) aCanvas.getWidth() - bounds.getMaxX());
-		dy = Math.min(dy, (int) aCanvas.getHeight() - bounds.getMaxY());
-
-		for(Node selected : aSelectionModel.getSelectedNodes())
-		{
-			selected.translate(dx, dy);
-		}
+		int dxCorrection = Math.max(-bounds.getX(), 0) 
+				+ Math.min((int)aCanvas.getWidth() - bounds.getMaxX(), 0);
+		int dyCorrection = Math.max(-bounds.getY(), 0) 
+				+ Math.min((int)aCanvas.getHeight() - bounds.getMaxY(), 0);
+		aSelectionModel.getSelectedNodes().forEach(selected -> selected.translate(dxCorrection, dyCorrection));
+		
 		aLastMousePoint = pMousePoint; 
 		aCanvas.paintPanel();
 	}
@@ -585,5 +608,70 @@ public class DiagramCanvasController
 		// Place the modified nodes on the top
 		selectedNodes.forEach(node -> aCanvas.getDiagram().placeOnTop(node));
 		aCanvas.paintPanel();
+	}
+	
+	/**
+	 * Tracks the movement of a set of selected diagram elements.
+	 */
+	private static final class MoveTracker
+	{
+		private final List<Node> aTrackedNodes = new ArrayList<>();
+		private final List<Rectangle> aOriginalBounds = new ArrayList<>();
+		
+		/**
+		 * Records the elements in pSelectedElements and their position at the 
+		 * time where the method is called.
+		 * 
+		 * @param pSelectedElements The elements that are being moved. Not null.
+		 */
+		void startTrackingMove(Iterable<DiagramElement> pSelectedElements)
+		{
+			assert pSelectedElements != null;
+			
+			aTrackedNodes.clear();
+			aOriginalBounds.clear();
+			
+			for(DiagramElement element : pSelectedElements)
+			{
+				assert element != null;
+				if(element instanceof Node)
+				{
+					aTrackedNodes.add((Node) element);
+					aOriginalBounds.add(NodeViewerRegistry.getBounds((Node)element));
+				}
+			}
+		}
+
+		/**
+		 * Creates and returns a CompoundOperation that represents the movement
+		 * of all tracked nodes between the time where startTrackingMove was 
+		 * called and the time endTrackingMove was called.
+		 * 
+		 * @param pDiagramBuilder The Diagram containing the selected elements.
+		 * @return A CompoundCommand describing the move.
+		 * @pre pDiagramBuilder != null
+		 */
+		CompoundOperation endTrackingMove(DiagramBuilder pDiagramBuilder)
+		{
+			assert pDiagramBuilder != null;
+			CompoundOperation operation = new CompoundOperation();
+			Rectangle[] selectionBounds2 = new Rectangle[aOriginalBounds.size()];
+			int i = 0;
+			for(Node node : aTrackedNodes)
+			{
+				selectionBounds2[i] = NodeViewerRegistry.getBounds(node);
+				i++;
+			}
+			for(i = 0; i < aOriginalBounds.size(); i++)
+			{
+				int dY = selectionBounds2[i].getY() - aOriginalBounds.get(i).getY();
+				int dX = selectionBounds2[i].getX() - aOriginalBounds.get(i).getX();
+				if(dX != 0 || dY != 0)
+				{
+					operation.add(DiagramBuilder.createMoveNodeOperation(aTrackedNodes.get(i), dX, dY));
+				}
+			}
+			return operation;
+		}
 	}
 }
